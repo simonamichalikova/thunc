@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import dataclasses
 import functools
 import hashlib
@@ -222,6 +221,8 @@ async def acall(
     The call runs in a worker thread (asyncio.to_thread), as an `async def` @thunc.function does, so
     the event loop keeps running while the model answers. To run many at once, use thunc.amap.
     """
+    import asyncio
+
     return await asyncio.to_thread(
         _call, instructions, inputs, returns, retries, ensure, backend, model, cache, name, None, system
     )
@@ -405,6 +406,8 @@ async def amap(func: Callable[[A], Any], items: Iterable[A], *, workers: int = 8
     first call that raises cancels the ones still waiting to start, and its error is raised."""
     if workers < 1:
         raise ValueError(f"amap: workers must be at least 1, got {workers}")
+    import asyncio
+
     limit = asyncio.Semaphore(workers)
 
     is_async = inspect.iscoroutinefunction(func)
@@ -427,6 +430,8 @@ def _completed(func: Callable[[A], Any], item: A) -> Any:
     """func(item), run to completion: an awaitable it returns is awaited in this thread's own loop."""
     result = func(item)
     if inspect.isawaitable(result):
+        import asyncio
+
         return asyncio.run(_awaited(result))
     return result
 

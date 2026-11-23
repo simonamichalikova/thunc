@@ -27,7 +27,6 @@ note saved with remember is on disk at once and reaches the model in the next ru
 
 from __future__ import annotations
 
-import asyncio
 import dataclasses
 import hashlib
 import inspect
@@ -324,6 +323,8 @@ class Agent:
         ensure: Callable[[Any], bool] | None = None,
     ) -> Any:
         """agent.call, to await. The run goes on in a worker thread, so the event loop stays free."""
+        import asyncio
+
         return await asyncio.to_thread(self.call, instructions, inputs, returns=returns, ensure=ensure)
 
     @overload

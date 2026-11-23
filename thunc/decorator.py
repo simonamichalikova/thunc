@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import functools
 import inspect
 import typing
@@ -125,6 +124,8 @@ def _wrap(func: Callable[..., Any], is_async: bool, run: Callable[..., Any]) -> 
     """`run` with the function's name and docstring; an awaitable if the function was `async def`."""
 
     async def run_async(*args: Any, **kwargs: Any) -> Any:
+        import asyncio
+
         return await asyncio.to_thread(run, *args, **kwargs)
 
     return functools.wraps(func)(run_async if is_async else run)
@@ -162,6 +163,8 @@ def _build_writing(func: Callable[..., Any], options: dict[str, Any]) -> Callabl
         return writer.impl(*args, **kwargs)
 
     async def run_async(*args: Any, **kwargs: Any) -> Any:
+        import asyncio
+
         if writer.impl is None:
             answer = await asyncio.to_thread(writer.answer, args, kwargs)
             if writer.impl is None:

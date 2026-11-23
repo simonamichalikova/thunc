@@ -31,7 +31,6 @@ or signature changes. After a write, the function is plain Python: the model isn
 from __future__ import annotations
 
 import ast
-import asyncio
 import contextlib
 import dataclasses
 import datetime as dt
@@ -745,7 +744,11 @@ def _run_case(func: Callable[..., Any], args: tuple[Any, ...], kwargs: dict[str,
     def target() -> None:
         try:
             result = func(*args, **kwargs)
-            box["value"] = asyncio.run(result) if spec.is_async and inspect.iscoroutine(result) else result
+            if spec.is_async and inspect.iscoroutine(result):
+                import asyncio
+
+                result = asyncio.run(result)
+            box["value"] = result
         except BaseException as exc:
             box["error"] = exc
 
